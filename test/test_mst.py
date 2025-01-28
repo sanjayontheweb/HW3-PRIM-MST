@@ -109,7 +109,23 @@ def test_mst_student():
     TODO: Write at least one unit test for MST construction.
     
     """
-    # Mock adjacency matrix (a simple undirected graph)
+    #Check empty matrix
+    matrix = np.array([])
+    with pytest.raises(ValueError):
+        g = Graph(matrix)
+        g.construct_mst()
+        pass 
+    
+
+    #Check non-square matrix
+    matrix = np.array([[1, 2, 3], [4, 5, 6]])
+    with pytest.raises(ValueError):
+        g = Graph(matrix)
+        g.construct_mst()
+        pass 
+
+
+    # Mock adjacency matrix
     adj_mat = np.array([
         [0, 2, 3, 0, 0],
         [2, 0, 15, 2, 0],
@@ -118,7 +134,7 @@ def test_mst_student():
         [0, 0, 13, 9, 0]
     ])
 
-    # Expected MST (manually calculated or verified separately)
+    # Expected MST
     expected_mst = np.array([
         [0, 2, 3, 0, 0],
         [2, 0, 0, 2, 0],

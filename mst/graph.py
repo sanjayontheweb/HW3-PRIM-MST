@@ -41,6 +41,14 @@ class Graph:
         `heapify`, `heappop`, and `heappush` functions.
 
         """
+        #Check if adj_mat is empty/non-square
+        if self.adj_mat.size == 0:
+            raise ValueError("Matrix is empty")
+        
+        # Check if the matrix is non-square
+        if self.adj_mat.shape[0] != self.adj_mat.shape[1]:
+            raise ValueError("Matrix is non-square")
+
         # Initialize empty array matrix
         self.mst = np.zeros_like(self.adj_mat)
         
