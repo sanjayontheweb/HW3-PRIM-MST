@@ -41,4 +41,23 @@ class Graph:
         `heapify`, `heappop`, and `heappush` functions.
 
         """
-        self.mst = None
+        # Initialize empty array matrix
+        self.mst = np.zeros_like(self.adj_mat)
+        
+        #Choose i = 0 as initial node
+        visited = {0}
+        neighbors = [(v,i,0) for i,v in enumerate(self.adj_mat[0]) if v != 0]
+        heapq.heapify(neighbors)
+
+        #Iterate n-1 times to add n-1 edges to self.mst
+        n = self.adj_mat.shape[0]
+        while len(visited) < n:
+            edge_weight, out_node, in_node = heapq.heappop(neighbors)
+            if out_node in visited:
+                continue
+            
+            self.mst[in_node, out_node] = edge_weight
+            self.mst[out_node, in_node] = edge_weight
+
+            visited.add(out_node)
+            [heapq.heappush(neighbors, (v,i,out_node)) for i,v in enumerate(self.adj_mat[out_node]) if (v != 0) and (i not in visited)]

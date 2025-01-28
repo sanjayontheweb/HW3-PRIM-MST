@@ -3,6 +3,7 @@ import numpy as np
 from mst import Graph
 from sklearn.metrics import pairwise_distances
 
+# Written with the aid of ChatGPT
 
 def check_mst(adj_mat: np.ndarray, 
               mst: np.ndarray, 
@@ -34,6 +35,43 @@ def check_mst(adj_mat: np.ndarray,
         for j in range(i+1):
             total += mst[i, j]
     assert approx_equal(total, expected_weight), 'Proposed MST has incorrect expected weight'
+
+    # check correct # of edges
+    assert np.count_nonzero(mst) == 2 * (adj_mat.shape[0] - 1)
+
+    # Check for connectedness using BFS
+    visited = set()
+    def bfs_connected(start_node):
+        queue = [start_node]
+        while queue:
+            node = queue.pop(0)
+            if node not in visited:
+                visited.add(node)
+                neighbors = np.where(mst[node] > 0)[0]
+                queue.extend([n for n in neighbors if n not in visited])
+
+    bfs_connected(0)  # Start BFS from node 0
+    assert len(visited) == adj_mat.shape[0], 'Proposed MST is not connected'
+
+    # Check for cycles using BFS
+    def bfs_cycle(start_node):
+        queue = [(start_node, -1)]  # (node, parent)
+        visited = set()
+        while queue:
+            node, parent = queue.pop(0)
+            if node not in visited:
+                visited.add(node)
+                for neighbor in np.where(mst[node] > 0)[0]:
+                    if neighbor not in visited:
+                        queue.append((neighbor, node))
+                    elif neighbor != parent:
+                        return True  # Cycle detected
+        return False
+
+    assert not bfs_cycle(0), 'Proposed MST contains a cycle'
+
+
+
 
 
 def test_mst_small():
@@ -71,4 +109,35 @@ def test_mst_student():
     TODO: Write at least one unit test for MST construction.
     
     """
-    pass
+    # Mock adjacency matrix (a simple undirected graph)
+    adj_mat = np.array([
+        [0, 2, 3, 0, 0],
+        [2, 0, 15, 2, 0],
+        [3, 15, 0, 0, 13],
+        [0, 2, 0, 0, 9],
+        [0, 0, 13, 9, 0]
+    ])
+
+    # Expected MST (manually calculated or verified separately)
+    expected_mst = np.array([
+        [0, 2, 3, 0, 0],
+        [2, 0, 0, 2, 0],
+        [3, 0, 0, 0, 0],
+        [0, 2, 0, 0, 9],
+        [0, 0, 0, 9, 0]
+    ])
+
+    # Expected weight of the MST
+    expected_weight = 16  # 2 + 3 + 2 + 9 = 16
+
+    # Construct MST using the Graph class
+    g = Graph(adj_mat)
+    g.construct_mst()
+
+    # Assert that the constructed MST matches the expected MST
+    assert np.allclose(g.mst, expected_mst), "MST does not match the expected result."
+
+    # Check the total weight of the MST
+    total_weight = np.sum(g.mst) / 2  # Sum of edges (undirected graph)
+    assert abs(total_weight - expected_weight) < 1e-6, "MST weight is incorrect."
+
